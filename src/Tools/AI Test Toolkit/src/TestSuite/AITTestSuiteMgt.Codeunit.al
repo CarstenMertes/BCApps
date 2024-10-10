@@ -28,6 +28,14 @@ codeunit 149034 "AIT Test Suite Mgt."
         CannotRunMultipleSuitesInParallelErr: Label 'There is already a test run in progress. You need to wait for it to finish or cancel it before starting a new test run.';
         FeatureNameLbl: Label 'AI Test Toolkit', Locked = true;
 
+    procedure StartAITSuite(Iterations: Integer; var AITTestSuite: Record "AIT Test Suite")
+    var
+        CurrentIteration: Integer;
+    begin
+        for CurrentIteration := 1 to Iterations do
+            StartAITSuite(AITTestSuite);
+    end;
+
     procedure StartAITSuite(var AITTestSuite: Record "AIT Test Suite")
     var
         AITTestSuite2: Record "AIT Test Suite";
@@ -301,7 +309,6 @@ codeunit 149034 "AIT Test Suite Mgt."
         AITLogEntry.Operation := CopyStr(ModifiedOperation, 1, MaxStrLen(AITLogEntry.Operation));
         AITLogEntry."Original Operation" := CopyStr(Operation, 1, MaxStrLen(AITLogEntry."Original Operation"));
         AITLogEntry.Tag := AITTestRunIteration.GetAITTestSuiteTag();
-        AITLogEntry."Model Version" := GlobalAITTestSuite."Model Version";
         AITLogEntry."Entry No." := 0;
 
         if ModifiedExecutionSuccess then
@@ -340,6 +347,7 @@ codeunit 149034 "AIT Test Suite Mgt."
             AITLogEntry.SetOutputBlob(TestOutput);
 
         AITLogEntry."Procedure Name" := CurrentTestMethodLine.Function;
+        AITLogEntry."Tokens Consumed" := AITTestRunIteration.GetAITokenUsedByLastTestMethodLine();
         AITLogEntry.Insert(true);
 
         Commit();
